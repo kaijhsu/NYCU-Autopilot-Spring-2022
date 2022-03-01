@@ -7,7 +7,7 @@ def scale(img, height, width, n):
     newimg = np.zeros((height*n, width*n, 3), np.uint8)
     for i in range(height*n):
         for j in range(width*n):
-            newimg[i,j] = img[math.floor(i/n),math.floor(j/n)]
+            newimg[i,j] = img[math.round(i/n),math.round(j/n)]
     return newimg
 
 image = cv2.imread("lisa.jpeg")
