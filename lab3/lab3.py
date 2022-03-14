@@ -1,19 +1,37 @@
 import cv2
 import numpy as np
-from numba import njit     
+from numba import njit
 
+class DisjSet:
+    def __init__(self, n):
+        self.rank = [1] * n
+        self.parent = [i for i in range(n)]
+
+    def find(self, x):
+        if (self.parent[x] != x):
+            self.parent[x] = self.find(self.parent[x])
+        return self.parent[x]
+
+    def union(self, x, y):
+        xset = self.find(x)
+        yset = self.find(y)
+        if xset == yset:
+            return
+        if self.rank[xset] < self.rank[yset]:
+            self.parent[xset] = yset
+ 
+        elif self.rank[xset] > self.rank[yset]:
+            self.parent[yset] = xset
+
+        else:
+            self.parent[yset] = xset
+            self.rank[xset] = self.rank[xset] + 1
+    
 @njit
-def connectedComponent(frame):
+def inConnectedComponent(frame,labels):
+    ret = list()
     height, width = frame.shape
-    
-    #simplify algorithm, avoid edge condition
-    labels = np.zeros((height+2,width+2), np.uint32)
     label_cnt = 1
-    
-    parent = dict()
-    parent[0] = 0
-    parent[1] = 1
-        
     for y in range(height):
         for x in range(width):
             pixel = frame[y][x]
@@ -23,13 +41,12 @@ def connectedComponent(frame):
                 labels[label_y, label_x] = 0
                 continue
             
-            upLabel = labels[y-1, x]
-            leftLabel = labels[y, x-1]
+            upLabel = labels[label_y-1, label_x]
+            leftLabel = labels[label_y, label_x-1]
             value = 0
             if(upLabel == 0 and leftLabel == 0):
                 value = label_cnt
                 label_cnt += 1
-                parent[label_cnt] = label_cnt
             elif(upLabel != 0 and leftLabel == 0):
                 value = upLabel
             elif(upLabel == 0 and leftLabel != 0):
@@ -37,29 +54,44 @@ def connectedComponent(frame):
             elif(upLabel == leftLabel):
                 value = upLabel
             else:
-                value = upLabel
-                parent[leftLabel] = parent[upLabel]
+                value = leftLabel
+                ret.append((leftLabel, upLabel))
             labels[label_y][label_x] = value
+    return ret
+            
+
+def connectedComponent(frame):
+    height, width = frame.shape
     
-    for i in range(label_cnt):
-        p = parent[i]
-        pp = parent[parent[i]]
-        while p != pp:
-            p = pp
-            pp = parent[pp]
-        parent[i] = p
-    for i in range(label_cnt):
-        p = parent[i]
-        pp = parent[parent[i]]
-        if p != pp:
-            print(p,pp)
-    
+    #simplify algorithm, avoid edge condition
+    labels = np.zeros((height+2,width+2), np.uint64)
+    unionList = inConnectedComponent(frame, labels)
+    disjoin = DisjSet(2000)
+    for i, j in unionList:
+        disjoin.union(i,j)
+            
     labels = labels[1:height+1, 1:width+1]
     for y in range(height):
         for x in range(width):
-            labels[y, x] = parent[labels[y,x]]
+            labels[y, x] = disjoin.find(labels[y,x])
+    
     return labels
 
+ 
+def connectedComponentTest():
+    testcase = [[1,1,1,1,1,1], \
+                [0,0,0,0,0,1], \
+                [0,1,0,1,0,1], \
+                [1,1,1,1,1,1], \
+                [0,0,0,0,0,1], \
+                [1,0,0,0,0,1]]
+    arr = np.array(testcase)
+    print(f"testcase\n", arr)
+    ret = connectedComponent(arr)
+    print(f"result\n", ret)
+    scc = selectConnectedComponent(ret, 1)
+    print(f"scc\n", scc)
+    
 @njit
 def selectConnectedComponent(keymap,T):
     areaDict = {}
@@ -91,8 +123,6 @@ def selectConnectedComponent(keymap,T):
                                      "minY": y,
                                      "maxY": y
                                     }
-            
-
     del areaDict[0]
     del minmaxDict[0]
 
@@ -102,8 +132,9 @@ def selectConnectedComponent(keymap,T):
             del areaDict[dictkey]
             del minmaxDict[dictkey]
     return minmaxDict
+   
     
-    
+# connectedComponentTest()
             
 
 cap = cv2.VideoCapture('vtest.mp4')
@@ -112,7 +143,9 @@ if cap.isOpened() == False:
 
 backSub = cv2.createBackgroundSubtractorMOG2()
     
+cnt = 1
 while True:
+    cnt +=1;
     ret, frame = cap.read()
     if ret == False:
         break
@@ -121,14 +154,17 @@ while True:
     shadowval = backSub.getShadowValue()
     ret, nmask = cv2.threshold(fgmask, shadowval, 255, cv2.THRESH_BINARY)
     labels = connectedComponent(nmask);
-    rects = selectConnectedComponent(labels,100)
-
+#     label_cnt, labels = cv2.connectedComponents(nmask);
+    rects = selectConnectedComponent(labels,200)
+    
     for key, value in rects.items():
         p1, p2 = (value['minX'],value['minY']), (value['maxX'], value['maxY'])
         cv2.rectangle(frame, p1, p2, 0x202F61, 2)
     
-    
+
     cv2.imshow("frame", frame)
+        
+        
     cv2.waitKey(1)
     
     
