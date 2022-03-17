@@ -1,3 +1,4 @@
+from cProfile import label
 import cv2
 import numpy as np
 from numba import njit
@@ -58,6 +59,14 @@ def inConnectedComponent(frame,labels):
                 ret.append((leftLabel, upLabel))
             labels[label_y][label_x] = value
     return ret
+
+@njit
+def afterConnectedComponent(labels, parents):
+    height, width = labels.shape
+    for y in range(height):
+        for x in range(width):
+            labels[y, x] = parents[labels[y, x]]
+    return labels
             
 
 def connectedComponent(frame):
@@ -71,10 +80,11 @@ def connectedComponent(frame):
         disjoin.union(i,j)
             
     labels = labels[1:height+1, 1:width+1]
-    for y in range(height):
-        for x in range(width):
-            labels[y, x] = disjoin.find(labels[y,x])
-    
+
+    parents = list(range(2000));
+    for i in range(2000):
+        parents[i] = disjoin.find(i);
+    labels = afterConnectedComponent(labels, parents)
     return labels
 
  
@@ -154,7 +164,7 @@ while True:
     shadowval = backSub.getShadowValue()
     ret, nmask = cv2.threshold(fgmask, shadowval, 255, cv2.THRESH_BINARY)
     labels = connectedComponent(nmask);
-#     label_cnt, labels = cv2.connectedComponents(nmask);
+    # label_cnt, labels = cv2.connectedComponents(nmask);
     rects = selectConnectedComponent(labels,200)
     
     for key, value in rects.items():
