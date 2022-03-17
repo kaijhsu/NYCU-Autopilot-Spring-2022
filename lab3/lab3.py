@@ -66,7 +66,6 @@ def afterConnectedComponent(labels, parents):
     for y in range(height):
         for x in range(width):
             labels[y, x] = parents[labels[y, x]]
-    return labels
             
 
 def connectedComponent(frame):
@@ -84,7 +83,7 @@ def connectedComponent(frame):
     parents = list(range(2000));
     for i in range(2000):
         parents[i] = disjoin.find(i);
-    labels = afterConnectedComponent(labels, parents)
+    afterConnectedComponent(labels, parents)
     return labels
 
  
