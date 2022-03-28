@@ -9,31 +9,7 @@ objpoints = []
 imgpoints = []
 dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
 parameters = cv2.aruco.DetectorParameters_create()
-# while(True):
-#     ret, frame = cap.read()
-#     if ret == False:
-#         print("Cannot read video")
-#         break
-#     objp = np.zeros((9*6, 3), np.float32)  # create h*w (0,0,0)
-#     objp[:, :2] = np.mgrid[0:6, 0:9].T.reshape(-1, 2)
-#     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-#     ret, corners = cv2.findChessboardCorners(frame, patternSize, None)
-#     if ret == True:
-#         objpoints.append(objp)
-#         cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1),
-#                          (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.1))
-#         imgpoints.append(corners)
-#         if len(imgpoints) == 5:
-#             break
-#
-#     cv2.imshow('frame', frame)
-#     cv2.waitKey(33)
-# ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(
-#     objpoints, imgpoints, gray.shape[::-1], None, None)
-# f = cv2.FileStorage("Calibration.xml", cv2.FILE_STORAGE_WRITE)
-# f.write("intrinsic", mtx)
-# f.write("distortion", dist)
-# f.release()
+
 
 f = cv2.FileStorage("Calibration.xml", cv2.FILE_STORAGE_READ)
 mtx = f.getNode("intrinsic").mat()
@@ -52,5 +28,13 @@ while(True):
         cv2.waitKey(33)
         continue
     frame = cv2.aruco.drawAxis(frame, mtx,dist, rvec, tvec, 0.5)
+    string = f"x: {np.round(tvec[0][0][0], 3)}  y: {np.round(tvec[0][0][1], 3)} z: {np.round(tvec[0][0][2], 3)}"
+
+    print(markerCorners[0][0][0])
+    centerX = int((markerCorners[0][0][0][0] + markerCorners[0][0][1][0] + markerCorners[0][0][2][0] + markerCorners[0][0][3][0])/4)
+    centerY = int((markerCorners[0][0][0][1] + markerCorners[0][0][1][1] + markerCorners[0][0][2][1] + markerCorners[0][0][3][1])/4)
+    coordinate = centerX+10, centerY+10
+    cv2.putText(frame, string, coordinate, cv2.FONT_HERSHEY_DUPLEX,
+                0.5, (0, 255, 255), 1, cv2.LINE_AA)
     cv2.imshow('frame', frame)
     cv2.waitKey(33)
