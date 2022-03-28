@@ -14,6 +14,7 @@ parameters = cv2.aruco.DetectorParameters_create()
 f = cv2.FileStorage("Calibration.xml", cv2.FILE_STORAGE_READ)
 mtx = f.getNode("intrinsic").mat()
 dist = f.getNode("distortion").mat()
+
 f.release()
 while(True):
     ret, frame = cap.read()
@@ -30,10 +31,9 @@ while(True):
     frame = cv2.aruco.drawAxis(frame, mtx,dist, rvec, tvec, 0.5)
     string = f"x: {np.round(tvec[0][0][0], 3)}  y: {np.round(tvec[0][0][1], 3)} z: {np.round(tvec[0][0][2], 3)}"
 
-    print(markerCorners[0][0][0])
     centerX = int((markerCorners[0][0][0][0] + markerCorners[0][0][1][0] + markerCorners[0][0][2][0] + markerCorners[0][0][3][0])/4)
     centerY = int((markerCorners[0][0][0][1] + markerCorners[0][0][1][1] + markerCorners[0][0][2][1] + markerCorners[0][0][3][1])/4)
-    coordinate = centerX+10, centerY+10
+    coordinate = centerX+15, centerY-15
     cv2.putText(frame, string, coordinate, cv2.FONT_HERSHEY_DUPLEX,
                 0.5, (0, 255, 255), 1, cv2.LINE_AA)
     cv2.imshow('frame', frame)
