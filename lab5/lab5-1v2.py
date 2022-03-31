@@ -1,8 +1,16 @@
 import cv2
 import numpy as np
 import cv2.aruco
+from djitellopy import Tello
+import time
 
-cap = cv2.VideoCapture(0)  # device
+
+
+# cap = cv2.VideoCapture(0)  # device
+drone = Tello()
+drone.connect()
+time.sleep(10)
+
 
 patternSize = (9, 6)
 objpoints = []
@@ -17,10 +25,13 @@ dist = f.getNode("distortion").mat()
 
 f.release()
 while(True):
-    ret, frame = cap.read()
-    if ret == False:
-        print("Cannot read video")
-        break
+    drone.streamon()
+    frame = drone.get_frame_read()
+    frame = frame.frame
+    #ret, frame = cap.read()
+    #if ret == False:
+    #    print("Cannot read video")
+    #    break
     markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(frame, dictionary, parameters=parameters)
     frame = cv2.aruco.drawDetectedMarkers(frame,markerCorners, markerIds)
     rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(markerCorners,15, mtx, dist)
