@@ -89,58 +89,75 @@ def main():
             markerCorners, 15, intrinsic, distortion)
         z_update = 0
         y_update = 0
+        flag_5 = 1
+        flag_3 = 1
         #yaw_update = 0
         yaw_update_deg = 0
-        if 0 in markerIds:
-            idx_0 =markerIds.tolist().index([0])
-            try:
-                frame = cv2.aruco.drawAxis(
-                    frame, intrinsic, distortion, rvec[idx_0], tvec[idx_0], 5)
-                tvec_str = "x=%4.0f y=%4.0f z=%4.0f" % (
-                    tvec[idx_0][0][0], tvec[idx_0][0][1], tvec[idx_0][0][2])
-                rvec_str = "x=%4.0f y=%4.0f z=%4.0f" % (
-                    rvec[idx_0][0][0], rvec[idx_0][0][1], rvec[idx_0][0][2])
-                # cv2.putText(frame, tvec_str, (20, 460),
-                #             cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2, cv2.LINE_AA)
-                #cv2.putText(frame, rvec_str, (20, 460), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2, cv2.LINE_AA)
-                print("s")
-                z_update = tvec[idx_0, 0, 2] - 100
-                z_update = z_pid.update(z_update, sleep=0)
-                if z_update > maxSpeed:
-                    z_update = maxSpeed
-                elif z_update < -maxSpeed:
-                    z_update = -maxSpeed
+        if markerIds is not None:
+            if 0 in markerIds:
+                idx_0 =markerIds.tolist().index([0])
+                try:
+                    frame = cv2.aruco.drawAxis(
+                        frame, intrinsic, distortion, rvec[idx_0], tvec[idx_0], 5)
+                    tvec_str = "x=%4.0f y=%4.0f z=%4.0f" % (
+                        tvec[idx_0][0][0], tvec[idx_0][0][1], tvec[idx_0][0][2])
+                    rvec_str = "x=%4.0f y=%4.0f z=%4.0f" % (
+                        rvec[idx_0][0][0], rvec[idx_0][0][1], rvec[idx_0][0][2])
+                    # cv2.putText(frame, tvec_str, (20, 460),
+                    #             cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2, cv2.LINE_AA)
+                    #cv2.putText(frame, rvec_str, (20, 460), cv2.FONT_HERSHEY_PLAIN, 2, (0, 0, 255), 2, cv2.LINE_AA)
+                    # print("s")
+                    z_update = tvec[idx_0, 0, 2] - 100
+                    z_update = z_pid.update(z_update, sleep=0)
+                    if z_update > maxSpeed:
+                        z_update = maxSpeed
+                    elif z_update < -maxSpeed:
+                        z_update = -maxSpeed
 
-                y_update = -tvec[idx_0, 0, 1] - 6
-                y_update = y_pid.update(y_update, sleep=0)
-                if y_update > maxSpeed:
-                    y_update = maxSpeed
-                if y_update < 0:
-                    y_update *= 2
-                if y_update > 0:
-                    y_update *= 2
-                elif y_update < -maxSpeed:
-                    y_update = -maxSpeed
+                    y_update = -tvec[idx_0, 0, 1] - 6
+                    y_update = y_pid.update(y_update, sleep=0)
+                    if y_update > maxSpeed:
+                        y_update = maxSpeed
+                    if y_update < 0:
+                        y_update *= 2
+                    if y_update > 0:
+                        y_update *= 2
+                    elif y_update < -maxSpeed:
+                        y_update = -maxSpeed
 
-                cv2.putText(frame, str(y_update), (20, 460),
-                            cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
+                    cv2.putText(frame, str(y_update), (20, 460),
+                                cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
 
-                yaw_update_deg = math.degrees(rvec[idx_0][0][2])
-                yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
-                if yaw_update_deg > maxSpeed:
-                    yaw_update_deg = maxSpeed
-                elif yaw_update_deg < -maxSpeed:
-                    yaw_update_deg = -maxSpeed
+                    yaw_update_deg = math.degrees(rvec[idx_0][0][2])
+                    yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
+                    if yaw_update_deg > maxSpeed:
+                        yaw_update_deg = maxSpeed
+                    elif yaw_update_deg < -maxSpeed:
+                        yaw_update_deg = -maxSpeed
 
-            except:
-                print("tvec_0:")
-                print(tvec[idx_0])
-        elif 5 in markerIds:
-            idx_5 = markerIds.tolist().index([5])
-            drone.move_left(80)
-            drone.move_forward(150)
-        elif 3 in markerIds:
-            idx_3 = markerIds.tolist().index([3])
+                except:
+                    print("tvec_0:")
+                    print(tvec[idx_0])
+            elif 5 in markerIds and flag_5 == 1:
+                idx_5 = markerIds.tolist().index([5])
+                drone.move_left(60)
+                drone.move_forward(150)
+                flag_5 = 0
+            elif 3 in markerIds:
+                idx_3 = markerIds.tolist().index([3])
+                if tvec[idx_3, 0, 2] < 110 and flag_3 == 1:
+                    z_update = 0
+                    drone.move_right(80)
+                    drone.move_forward(120)
+                    flag_3 = 0
+                    sleep(5)
+                else:
+                    z_update = tvec[idx_3, 0, 2] - 100
+                    z_update = z_pid.update(z_update, sleep=0)
+                    if z_update > maxSpeed:
+                        z_update = maxSpeed
+                    elif z_update < -maxSpeed:
+                        z_update = -maxSpeed
         key = cv2.waitKey(1)
         if key == -1:
             drone.send_rc_control(0, int(z_update), int(
