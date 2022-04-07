@@ -135,7 +135,12 @@ def main():
             except:
                 print("tvec_0:")
                 print(tvec[idx_0])
-
+        elif 5 in markerIds:
+            idx_5 = markerIds.tolist().index([5])
+            drone.move_left(80)
+            drone.move_forward(150)
+        elif 3 in markerIds:
+            idx_3 = markerIds.tolist().index([3])
         key = cv2.waitKey(1)
         if key == -1:
             drone.send_rc_control(0, int(z_update), int(
