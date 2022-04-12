@@ -170,7 +170,7 @@ def main():
                         drone.move_down(delta_height)
                 if tvec[idx_5, 0, 2] < 110 :
                     z_update = 0
-                    drone.move_left(40)
+                    drone.move_left(45)
                     drone.move_forward(50)
                     flag_5 = 0
                     time.sleep(5)
@@ -183,14 +183,14 @@ def main():
                         z_update = -maxSpeed
             elif 3 in markerIds and flag_3 == 1 and flag_5 == 0:
                 idx_3 = markerIds.tolist().index([3])
-                if tvec[idx_3, 0, 2] < 110 :
+                if tvec[idx_3, 0, 2] < 85 :
                     z_update = 0
                     drone.move_right(80)
-                    drone.move_forward(120)
+                    drone.move_forward(100)
                     flag_3 = 0
                     time.sleep(5)
                 else:
-                    z_update = tvec[idx_3, 0, 2] - 100
+                    z_update = tvec[idx_3, 0, 2] - 75
                     z_update = z_pid.update(z_update, sleep=0)
                     if z_update > maxSpeed:
                         z_update = maxSpeed
