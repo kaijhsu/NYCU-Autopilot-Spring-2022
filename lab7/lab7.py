@@ -56,7 +56,7 @@ def keyboard(self, key):
 def main():
     drone = Tello()
     drone.connect()
-    time.sleep(10)
+    # time.sleep(10)
     global isFliying
     fs = cv2.FileStorage("Calibration.xml", cv2.FILE_STORAGE_READ)
     intrinsic = fs.getNode("intrinsic").mat()
@@ -105,7 +105,7 @@ def main():
                     drone.move_up(30)
                     z_update = 0
                     y_update = 0
-                    time.sleep(6)
+                    # time.sleep(6)
                     flag_1 = 0
                 else:
                     z_update = tvec[idx_1, 0, 2] - 90
@@ -146,23 +146,21 @@ def main():
                     elif y_update < -maxSpeed:
                         y_update = -maxSpeed
 
-                    cv2.putText(frame, str(y_update), (20, 460),
-                                cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
-
                     yaw_update_deg = math.degrees(rvec[idx_0][0][2])
                     yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
                     if yaw_update_deg > maxSpeed:
                         yaw_update_deg = maxSpeed
                     elif yaw_update_deg < -maxSpeed:
                         yaw_update_deg = -maxSpeed
-
+                    cv2.putText(frame, str(yaw_update_deg), (20, 460),
+                                cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
                 except:
                     print("tvec_0:")
                     print(tvec[idx_0])
             elif 5 in markerIds and flag_5 == 1:
                 idx_5 = markerIds.tolist().index([5])
                 height = drone.get_height()
-                delta_height = int(height - 130)
+                delta_height = int(height - 140)
                 if abs(delta_height) > 20 :
                     if delta_height < 0:
                         drone.move_up(-1*delta_height)
@@ -170,10 +168,10 @@ def main():
                         drone.move_down(delta_height)
                 if tvec[idx_5, 0, 2] < 110 :
                     z_update = 0
-                    drone.move_left(45)
+                    drone.move_left(40)
                     drone.move_forward(50)
                     flag_5 = 0
-                    time.sleep(5)
+                    # time.sleep(5)
                 else:
                     z_update = tvec[idx_5, 0, 2] - 100
                     z_update = z_pid.update(z_update, sleep=0)
@@ -186,9 +184,10 @@ def main():
                 if tvec[idx_3, 0, 2] < 85 :
                     z_update = 0
                     drone.move_right(80)
-                    drone.move_forward(100)
+                    drone.move_forward(150)
+                    drone.rotate_counter_clockwise(30)
                     flag_3 = 0
-                    time.sleep(5)
+                    # time.sleep(5)
                 else:
                     z_update = tvec[idx_3, 0, 2] - 75
                     z_update = z_pid.update(z_update, sleep=0)
@@ -213,10 +212,11 @@ def main():
                         yaw_update_deg = maxSpeed
                     elif yaw_update_deg < -maxSpeed:
                         yaw_update_deg = -maxSpeed
+                    cv2.putText(frame, str(yaw_update_deg), (20, 460),
+                                cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
 
 
-
-        key = cv2.waitKey(1)
+        key = cv2.waitKey(33)
         if key == -1:
             drone.send_rc_control(0, int(z_update), int(
                 y_update), int(yaw_update_deg))
