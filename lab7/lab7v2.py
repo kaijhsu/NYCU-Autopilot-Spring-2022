@@ -245,7 +245,7 @@ def main():
                     x_update = tvec[idx_4, 0, 0]
                     x_update = x_pid.update(x_update, sleep=0)
                     if x_update > maxSpeed:
-                        x_update = maxSpeed`
+                        x_update = maxSpeed
                     elif x_update < -maxSpeed:
                         x_update = -maxSpeed
 
