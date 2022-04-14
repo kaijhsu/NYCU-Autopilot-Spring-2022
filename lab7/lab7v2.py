@@ -146,8 +146,13 @@ def main():
                     z_update = -maxSpeed
 
                 height = drone.get_height()
-                if height > 170 :
-                    drone.move_down(20)
+                delta_height = int(height - 140)
+                if height > 160:
+                    if abs(delta_height) > 20 :
+                        if delta_height < 0:
+                            drone.move_up(-1*delta_height)
+                        else:
+                            drone.move_down(delta_height)
                 else:
                     y_update = -tvec[idx_0, 0, 1] - 15
                     y_update = y_pid.update(y_update, sleep=0)
