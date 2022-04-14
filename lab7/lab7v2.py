@@ -263,7 +263,7 @@ def main():
                     cv2.putText(frame, str(tvec[idx_4, 0, 0]), (20, 460),
                                 cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
 
-        key = cv2.waitKey(33)
+        key = cv2.waitKey(1)
         if key == -1:
             y_update = min(y_update, 30)
             drone.send_rc_control(int(x_update), int(z_update), int(
@@ -273,6 +273,7 @@ def main():
             keyboard(drone, key)
 
         cv2.imshow("frame", frame)
+        cv2.waitKey(33)
 
 if __name__ == "__main__":
     main()
