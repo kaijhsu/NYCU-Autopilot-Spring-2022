@@ -65,7 +65,7 @@ def main():
     z_pid = PID(kP=0.7, kI=0.0001, kD=0.1)
     y_pid = PID(kP=0.7, kI=0.001, kD=0.1)
     yaw_pid = PID(kP=0.7, kI=0.0001, kD=0.2)
-    x_pid = PID(kP=0.7, kI=0.01, kD=0.1)
+    x_pid = PID(kP=0.7, kI=0.001, kD=0.1)
 
 
     z_pid.initialize()
@@ -97,6 +97,7 @@ def main():
         z_update = 0
         y_update = 0
         yaw_update_deg = 0
+        max_x_fix = 15
 
         if markerIds is not None:
             if 1 in markerIds and flag_1 == 1:
@@ -187,8 +188,8 @@ def main():
                         drone.move_down(delta_height)
                 if tvec[idx_5, 0, 2] < 110 and abs(tvec[idx_5, 0 ,0]) < 20 :
                     z_update = 0
-                    drone.move_left(43)
-                    drone.move_forward(60)
+                    drone.move_left(50)
+                    drone.move_forward(40)
                     flag_5 = 0
                     # time.sleep(5)
                 else:
@@ -214,51 +215,53 @@ def main():
                         yaw_update_deg = -maxSpeed
             elif 3 in markerIds and flag_3 == 1 and flag_5 == 0:
                 idx_3 = markerIds.tolist().index([3])
-                if tvec[idx_3, 0, 2] < 85 and abs(tvec[idx_3, 0 ,0]) < 20 :
+                if tvec[idx_3, 0, 2] < 110 and abs(tvec[idx_3, 0 ,0]) < 15 :
                     z_update = 0
+                    drone.move_forward(50)
                     drone.move_right(100)
-                    drone.move_forward(150)
-                    drone.rotate_counter_clockwise(22)
+                    drone.move_forward(165)
+                    drone.rotate_counter_clockwise(30)
                     flag_3 = 0
                 else:
-                    z_update = tvec[idx_3, 0, 2] - 75
+                    z_update = tvec[idx_3, 0, 2] - 100
                     z_update = z_pid.update(z_update, sleep=0)
                     if z_update > maxSpeed:
                         z_update = maxSpeed
                     elif z_update < -maxSpeed:
                         z_update = -maxSpeed
 
-                    # x_update = tvec[idx_3, 0, 0]
-                    # x_update = x_pid.update(x_update, sleep=0)
-                    # if x_update > maxSpeed:
-                    #     x_update = maxSpeed
-                    # elif x_update < -maxSpeed:
-                    #     x_update = -maxSpeed
+                    x_update = tvec[idx_3, 0, 0]
+                    x_update = x_pid.update(x_update, sleep=0)
+                    if x_update > max_x_fix:
+                        x_update = max_x_fix
+                    elif x_update < -max_x_fix:
+                        x_update = -max_x_fix
 
-                    yaw_update_deg = math.degrees(rvec[idx_3][0][2])
-                    yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
-                    if yaw_update_deg > maxSpeed:
-                        yaw_update_deg = maxSpeed
-                    elif yaw_update_deg < -maxSpeed:
-                        yaw_update_deg = -maxSpeed
+                    # yaw_update_deg = math.degrees(rvec[idx_3][0][2])
+                    # yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
+                    # if yaw_update_deg > maxSpeed:
+                    #     yaw_update_deg = maxSpeed
+                    # elif yaw_update_deg < -maxSpeed:
+                    #     yaw_update_deg = -maxSpeed
             elif 4 in markerIds and flag_3 == 0 and flag_5 == 0:
                 idx_4 =markerIds.tolist().index([4])
-                if tvec[idx_4, 0, 2] < 95  and tvec[idx_4, 0, 0] < 12:
+                if tvec[idx_4, 0, 2] < 105  and tvec[idx_4, 0, 0] < 10:
                     drone.land()
+                    time.sleep(5)
                 else:
-                    z_update = tvec[idx_4, 0, 2] - 85
+                    z_update = tvec[idx_4, 0, 2] - 95
                     z_update = z_pid.update(z_update, sleep=0)
-                    if z_update > maxSpeed:
-                        z_update = maxSpeed
-                    elif z_update < -maxSpeed:
-                        z_update = -maxSpeed
+                    if z_update > 25:
+                        z_update = 25
+                    elif z_update < -25:
+                        z_update = -25
 
                     x_update = tvec[idx_4, 0, 0]
                     x_update = x_pid.update(x_update, sleep=0)
-                    if x_update > maxSpeed:
-                        x_update = maxSpeed
-                    elif x_update < -maxSpeed:
-                        x_update = -maxSpeed
+                    if x_update > max_x_fix:
+                        x_update = max_x_fix
+                    elif x_update < -max_x_fix:
+                        x_update = -max_x_fix
 
                     yaw_update_deg = math.degrees(rvec[idx_4][0][2])
                     yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
