@@ -61,7 +61,7 @@ def main():
     distortion = fs.getNode("distortion").mat()
 
     z_pid = PID(kP=0.7, kI=0.0001, kD=0.1)
-    y_pid = PID(kP=0.7, kI=0.01, kD=0.1)
+    y_pid = PID(kP=0.7, kI=0.001, kD=0.1)
     yaw_pid = PID(kP=0.7, kI=0.0001, kD=0.2)
     x_pid = PID(kP=0.7, kI=0.01, kD=0.1)
 
@@ -104,6 +104,7 @@ def main():
                     delta_height = height - 30
                     if delta_height > 20:
                         drone.move_down(delta_height)
+                        time.sleep(1)
                     drone.move_forward(200)
                     drone.move_up(30)
                     z_update = 0
@@ -129,8 +130,8 @@ def main():
                         yaw_update_deg = maxSpeed
                     elif yaw_update_deg < -maxSpeed:
                         yaw_update_deg = -maxSpeed
-            elif 0 in markerIds and flag_1 == 0 :
-                idx_0 = markerIds.tolist().index([0])
+            elif 6 in markerIds and flag_1 == 0 :
+                idx_0 = markerIds.tolist().index([6])
                 frame = cv2.aruco.drawAxis(
                     frame, intrinsic, distortion, rvec[idx_0], tvec[idx_0], 5)
                 tvec_str = "x=%4.0f y=%4.0f z=%4.0f" % (
@@ -154,8 +155,10 @@ def main():
                         else:
                             drone.move_down(delta_height)
                 else:
-                    y_update = -tvec[idx_0, 0, 1] - 15
+                    y_update = -tvec[idx_0, 0, 1] - 10
                     y_update = y_pid.update(y_update, sleep=0)
+                    if y_update < 0:
+                        y_update *= 2
                     if y_update > maxSpeed:
                         y_update = maxSpeed
                     elif y_update < -maxSpeed:
@@ -168,7 +171,7 @@ def main():
                 elif yaw_update_deg < -maxSpeed:
                     yaw_update_deg = -maxSpeed
 
-                cv2.putText(frame, str(tvec[idx_0, 0, 0]), (20, 460),
+                cv2.putText(frame, str(y_update), (20, 460),
                             cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
             elif 5 in markerIds and flag_5 == 1:
                 idx_5 = markerIds.tolist().index([5])
