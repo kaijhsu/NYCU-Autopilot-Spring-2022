@@ -48,7 +48,9 @@ def keyboard(self, key):
         print(height)
     if key == ord('6'):
         battery = self.get_battery()
-        print("battery"+str(battery))
+        print("battery:  "+str(battery))
+        print("battery:  "+str(battery))
+        print("battery:  "+str(battery))
 
 
 def main():
@@ -99,9 +101,10 @@ def main():
         if markerIds is not None:
             if 1 in markerIds and flag_1 == 1:
                 idx_1 = markerIds.tolist().index([1])
-                if tvec[idx_1, 0, 2] < 100 :
+                if tvec[idx_1, 0, 2] < 150 :
                     height = int(drone.get_height())
                     delta_height = height - 30
+                    drone.move_forward(60)
                     if delta_height > 20:
                         drone.move_down(delta_height)
                         time.sleep(1)
@@ -112,7 +115,7 @@ def main():
                     # time.sleep(6)
                     flag_1 = 0
                 else:
-                    z_update = tvec[idx_1, 0, 2] - 90
+                    z_update = tvec[idx_1, 0, 2] - 140
                     z_update = z_pid.update(z_update, sleep=0)
                     if z_update > maxSpeed:
                         z_update = maxSpeed
@@ -124,12 +127,12 @@ def main():
                         x_update = maxSpeed
                     elif x_update < -maxSpeed:
                         x_update = -maxSpeed
-                    yaw_update_deg = math.degrees(rvec[idx_1][0][2])
-                    yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
-                    if yaw_update_deg > maxSpeed:
-                        yaw_update_deg = maxSpeed
-                    elif yaw_update_deg < -maxSpeed:
-                        yaw_update_deg = -maxSpeed
+                    # yaw_update_deg = math.degrees(rvec[idx_1][0][2])
+                    # yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
+                    # if yaw_update_deg > maxSpeed:
+                    #     yaw_update_deg = maxSpeed
+                    # elif yaw_update_deg < -maxSpeed:
+                    #     yaw_update_deg = -maxSpeed
             elif 6 in markerIds and flag_1 == 0 :
                 idx_0 = markerIds.tolist().index([6])
                 frame = cv2.aruco.drawAxis(
@@ -139,7 +142,7 @@ def main():
                 rvec_str = "x=%4.0f y=%4.0f z=%4.0f" % (
                     rvec[idx_0][0][0], rvec[idx_0][0][1], rvec[idx_0][0][2])
 
-                z_update = tvec[idx_0, 0, 2] - 80
+                z_update = tvec[idx_0, 0, 2] - 100
                 z_update = z_pid.update(z_update, sleep=0)
                 if z_update > maxSpeed:
                     z_update = maxSpeed
@@ -171,7 +174,7 @@ def main():
                 elif yaw_update_deg < -maxSpeed:
                     yaw_update_deg = -maxSpeed
 
-                cv2.putText(frame, str(y_update), (20, 460),
+                cv2.putText(frame, str(x_update), (20, 460),
                             cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
             elif 5 in markerIds and flag_5 == 1:
                 idx_5 = markerIds.tolist().index([5])
@@ -184,7 +187,7 @@ def main():
                         drone.move_down(delta_height)
                 if tvec[idx_5, 0, 2] < 110 and abs(tvec[idx_5, 0 ,0]) < 20 :
                     z_update = 0
-                    drone.move_left(42)
+                    drone.move_left(43)
                     drone.move_forward(60)
                     flag_5 = 0
                     # time.sleep(5)
@@ -196,12 +199,12 @@ def main():
                     elif z_update < -maxSpeed:
                         z_update = -maxSpeed
 
-                    x_update = tvec[idx_5, 0, 0]
-                    x_update = x_pid.update(x_update, sleep=0)
-                    if x_update > maxSpeed:
-                        x_update = maxSpeed
-                    elif x_update < -maxSpeed:
-                        x_update = -maxSpeed
+                    # x_update = tvec[idx_5, 0, 0]
+                    # x_update = x_pid.update(x_update, sleep=0)
+                    # if x_update > maxSpeed:
+                    #     x_update = maxSpeed
+                    # elif x_update < -maxSpeed:
+                    #     x_update = -maxSpeed
 
                     yaw_update_deg = math.degrees(rvec[idx_5][0][2])
                     yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
@@ -225,12 +228,12 @@ def main():
                     elif z_update < -maxSpeed:
                         z_update = -maxSpeed
 
-                    x_update = tvec[idx_3, 0, 0]
-                    x_update = x_pid.update(x_update, sleep=0)
-                    if x_update > maxSpeed:
-                        x_update = maxSpeed
-                    elif x_update < -maxSpeed:
-                        x_update = -maxSpeed
+                    # x_update = tvec[idx_3, 0, 0]
+                    # x_update = x_pid.update(x_update, sleep=0)
+                    # if x_update > maxSpeed:
+                    #     x_update = maxSpeed
+                    # elif x_update < -maxSpeed:
+                    #     x_update = -maxSpeed
 
                     yaw_update_deg = math.degrees(rvec[idx_3][0][2])
                     yaw_update_deg = yaw_pid.update(yaw_update_deg, sleep=0)
