@@ -129,7 +129,7 @@ def main():
                         yaw_update_deg = maxSpeed
                     elif yaw_update_deg < -maxSpeed:
                         yaw_update_deg = -maxSpeed
-            elif 0 in markerIds:
+            elif 0 in markerIds and flag_1 == 0 :
                 idx_0 = markerIds.tolist().index([0])
                 frame = cv2.aruco.drawAxis(
                     frame, intrinsic, distortion, rvec[idx_0], tvec[idx_0], 5)
