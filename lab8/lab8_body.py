@@ -4,7 +4,7 @@ cap = cv2.VideoCapture(0)
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-f = cv2.FileStorage("Cablibration.xml", cv2.FILE_STORAGE_READ)
+f = cv2.FileStorage("Calibration.xml", cv2.FILE_STORAGE_READ)
 intrinsic = f.getNode("intrinsic").mat()
 distortion = f.getNode("distortion").mat()
 print(intrinsic)
@@ -17,13 +17,12 @@ while True:
     # print(f"rects = {rects}")
     # print(f"weights = {weights}")
     for rect in rects:
-        if rects != ():
-            x = rect[0]
-            y = rect[1]
-            h = rect[2]
-            w = rect[3]
-            img = cv2.rectangle(
-                img, (x, y), (x+h, y+w), (255, 0, 0), 3)
+        x = rect[0]
+        y = rect[1]
+        h = rect[2]
+        w = rect[3]
+        img = cv2.rectangle(
+            img, (x, y), (x+h, y+w), (255, 0, 0), 3)
     # objp
     objp = np.zeros((9*6, 3), np.float32)
     objp[:, :2] = np.mgrid[0:6*2.4:2.4, 0: 9*2.4:2.4].T.reshape(-1, 2)
@@ -33,8 +32,9 @@ while True:
     if ret == True:
         cv2.cornerSubPix(gray, corners, (5, 5), (-1, -1),
                          (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.1))
-    imgpoints.append(corners)
-    if len(imgpoints) == 5:
+    # imgpoints.append(corners)
+    # if len(imgpoints) == 1:
+        imgpoints = corners
         break
     cv2.imshow("Image", img)
     cv2.waitKey(1)
