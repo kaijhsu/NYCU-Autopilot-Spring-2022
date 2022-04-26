@@ -26,7 +26,7 @@ while(True):
                          (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.1))
         print(corners)
         imgpoints.append(corners)
-        if len(imgpoints) == 5:
+        if len(imgpoints) == 50:
             break
 
     cv2.imshow('frame', frame)
