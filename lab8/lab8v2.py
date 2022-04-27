@@ -9,7 +9,7 @@ detector = dlib.get_frontal_face_detector()
 hog = cv2.HOGDescriptor()
 hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-f = cv2.FileStorage("Calibration.xml", cv2.FILE_STORAGE_READ)
+f = cv2.FileStorage("../Calibration_KJ_Linux.xml", cv2.FILE_STORAGE_READ)
 intrinsic = f.getNode("intrinsic").mat()
 distortion = f.getNode("distortion").mat()
 
@@ -40,16 +40,16 @@ def main():
             x2 = d.right()
             y2 = d.bottom()
             frame = cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 3)
-            print(f"{x2-x1} {y2-y1}")
+            # print(f"{x2-x1} {y2-y1}")
             objectPoints = np.array([ [ 0,  0, 0],
-                                      [ 0,  10, 0],
-                                      [ 0, 20, 0],
-                                      [ 10,  0, 0],
-                                      [ 10,  10, 0],
-                                      [ 10, 20, 0],
-                                      [20,  0, 0],
-                                      [20,  10, 0],
-                                      [20, 20, 0]], dtype=float)
+                                      [ 0,  7.5, 0],
+                                      [ 0, 15, 0],
+                                      [ 7.5,  0, 0],
+                                      [ 7.5,  7.5, 0],
+                                      [ 7.5, 15, 0],
+                                      [15,  0, 0],
+                                      [15,  7.5, 0],
+                                      [15, 15, 0]], dtype=float)
             imagePoints  = np.array([[y1, x1],
                                      [y1, (x1+x2)/2],
                                      [y1, x2],
@@ -84,11 +84,12 @@ def main():
                                      [y2, x2]]).round()
             # print(imagePoints)
             retval, rvec, tvec = cv2.solvePnP(objectPoints_b, imagePoints_b, intrinsic, distortion)
-            distance = tvec[2]
+            distance = tvec[2]/2
+            distance = int(distance)
             frame = cv2.putText(frame, f"{distance}", (x1, y1), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 255), 1, cv2.LINE_AA)
 
         cv2.imshow("cap", frame)
-        key = cv2.waitKey(1)
+        key = cv2.waitKey(5)
         if key != -1:
             cv2.destroyAllWindows()
             break
