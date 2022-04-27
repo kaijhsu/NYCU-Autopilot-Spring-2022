@@ -14,7 +14,7 @@ intrinsic = f.getNode("intrinsic").mat()
 distortion = f.getNode("distortion").mat()
 
 objectPoints_b = np.zeros((3*3, 3), np.float32)
-objectPoints_b[:, :2] =  np.mgrid[0:101:50, 0: 201:100].T.reshape(-1, 2)
+objectPoints_b[:, :2] =  np.mgrid[0:101:50, 0: 191:85].T.reshape(-1, 2)
 
 
 def estimateFaceDistance(width):
@@ -87,9 +87,10 @@ def main():
             distance = tvec[2]/2
             distance = int(distance)
             frame = cv2.putText(frame, f"{distance}", (x1, y1), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 255), 1, cv2.LINE_AA)
+            print(distance)
 
         cv2.imshow("cap", frame)
-        key = cv2.waitKey(5)
+        key = cv2.waitKey(15)
         if key != -1:
             cv2.destroyAllWindows()
             break
