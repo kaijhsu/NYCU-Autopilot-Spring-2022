@@ -46,13 +46,14 @@ while True:
             imgpoints = np.array(imgpoints, np.float32)
             retval, rvec, tvec = cv2.solvePnP(
                 objp, imgpoints, intrinsic, distortion)
-            cv2.putText(img, str(f"rvec = {np.round_(rvec)}"),
-                        (x-50, y+100), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
-            cv2.putText(img, str(f"tvec = {np.round_(tvec)}"),
+            refine_z = 0.9596*int(tvec[2]) - 203.7037
+            # cv2.putText(img, str(f"rvec = {np.round_(rvec)}"),
+            #             (x-50, y+100), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
+            cv2.putText(img, str(f"refine_z = {np.round_(refine_z)}"),
                         (x-50, y+50), cv2.FONT_HERSHEY_PLAIN, 2, (255, 0, 0), 2)
             # print(f"rvec: {np.round_(rvec)}")
             # print(f"tvec: {np.round_(tvec)}")
-            print(tvec[2])
+            print(refine_z)
             # tvec2_record.append(int(tvec[2]))
 
     cv2.imshow("Image", img)
