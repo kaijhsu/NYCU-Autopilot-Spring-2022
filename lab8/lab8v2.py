@@ -41,15 +41,16 @@ def main():
             y2 = d.bottom()
             frame = cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 0), 3)
             # print(f"{x2-x1} {y2-y1}")
+            faceSize = 20
             objectPoints = np.array([ [ 0,  0, 0],
-                                      [ 0,  7.5, 0],
-                                      [ 0, 15, 0],
-                                      [ 7.5,  0, 0],
-                                      [ 7.5,  7.5, 0],
-                                      [ 7.5, 15, 0],
-                                      [15,  0, 0],
-                                      [15,  7.5, 0],
-                                      [15, 15, 0]], dtype=float)
+                                      [ 0,  faceSize/2, 0],
+                                      [ 0,  faceSize, 0],
+                                      [ faceSize/2,  0, 0],
+                                      [ faceSize/2,  faceSize/2, 0],
+                                      [ faceSize/2,  faceSize, 0],
+                                      [   faceSize,           0, 0],
+                                      [   faceSize,  faceSize/2, 0],
+                                      [   faceSize,    faceSize, 0]], dtype=float)
             imagePoints  = np.array([[y1, x1],
                                      [y1, (x1+x2)/2],
                                      [y1, x2],
@@ -61,7 +62,7 @@ def main():
                                      [y2, x2]]).round()
             # print(imagePoints)
             retval, rvec, tvec = cv2.solvePnP(objectPoints, imagePoints, intrinsic, distortion)
-            distance = tvec[2]/2
+            distance = tvec[2]/2-20
             frame = cv2.putText(frame, f"{distance}", (x1, y1), cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 255), 1, cv2.LINE_AA)
             # rvec, tvec = estimateDistance(test, imagePoints)
 
