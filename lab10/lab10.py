@@ -93,8 +93,8 @@ def main():
         mask = cv2.inRange(hsv_frame, lower_range, upper_range)
         result = cv2.bitwise_and(frame, frame, mask=mask)
 
-        frame = cv2.cvtColor(result,cv2.COLOR_HSV2RGB)
-        gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        frameb = cv2.cvtColor(result,cv2.COLOR_HSV2RGB)
+        gray = cv2.cvtColor(frameb, cv2.COLOR_RGB2GRAY)
         blur_gray = cv2.GaussianBlur(gray,(9, 9), 0)
         edges_frame = cv2.Canny(blur_gray, 30, 70)
 
