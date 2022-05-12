@@ -96,13 +96,12 @@ def main():
         gray = cv2.cvtColor(frameb, cv2.COLOR_RGB2GRAY)
         blur_gray = cv2.GaussianBlur(gray,(9, 9), 0)
         edges_frame = cv2.Canny(blur_gray, 30, 70)
-        inputarry = gridDetector(edges_frame,3000)
+        inputarry = gridDetector(edges_frame,38000)
+        # rgb_edge_frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+        print(np.reshape(inputarry, (3,3)))
         # for i in range(h):
         #     for j in range(w):
         #         print()
-        cv2.imshow('frame', frame)
-        cv2.imshow('Result', edges_frame)
-
         # cv2.imshow("frame", frame)
         dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
         parameters = cv2.aruco.DetectorParameters_create()
@@ -122,7 +121,7 @@ def main():
         if markerIds is not None and flag == 0 :
             if 0 in markerIds :
                 idx_0 = markerIds.tolist().index([0])
-                if tvec[idx_0,0,2] < 80 and tvec[idx_0,0,1] < 10 and tvec[idx_0,0,0] < 10 and inputarry[1] and inputarry[5]:
+                if tvec[idx_0,0,2] < 80 and tvec[idx_0,0,1] < 10 and inputarry[1] and inputarry[5]:
                     flag = 1
                     time.sleep(5)
                 else:
@@ -163,40 +162,40 @@ def main():
         if flag == 1:
             if (inputarry[2] & inputarry[5]) or (inputarry[5] & inputarry[8]):
                 flag = 2
-                drone.move_right(20)
+                drone.move_right(40)
             else:
-                drone.move_right(20)
-        if flag == 2:
+                drone.move_right(40)
+        elif flag == 2:
             if (inputarry[0] & inputarry[1]) or (inputarry[1] & inputarry[2]):
                 flag = 3
-                drone.move_up(20)
+                drone.move_up(40)
             else:
-                drone.move_up(20)
-        if flag == 3:
+                drone.move_up(40)
+        elif flag == 3:
             if (inputarry[2] & inputarry[5]) or (inputarry[5] & inputarry[8]):
                 flag = 4
-                drone.move_right(20)
+                drone.move_right(40)
             else:
-                drone.move_right(20)
-        if flag == 4:
+                drone.move_right(40)
+        elif flag == 4:
             if (inputarry[0] & inputarry[1]) or (inputarry[1] & inputarry[2]):
                 flag = 5
-                drone.move_up(20)
+                drone.move_up(40)
             else:
-                drone.move_up(20)
-        if flag == 5:
+                drone.move_up(40)
+        elif flag == 5:
             if (inputarry[0] & inputarry[3]) or (inputarry[3] & inputarry[6]):
                 flag = 6
-                drone.move_left(20)
+                drone.move_left(40)
             else:
-                drone.move_left(20)
-        if flag == 6:
+                drone.move_left(40)
+        elif flag == 6:
             if ~(inputarry[6] & inputarry[7] & inputarry[8]):
                 flag = 7
-                drone.move_down(20)
+                drone.move_down(40)
             else:
-                drone.move_down(20)
-        if flag == 7:
+                drone.move_down(40)
+        elif flag == 7:
             drone.land()
         print(flag)
         key = cv2.waitKey(1)
@@ -207,6 +206,11 @@ def main():
             print("no input")
         else:
             keyboard(drone, key)
+        # img = np.hstack((frame,rgb_edge_frame))
+
+        cv2.imshow('frame', frame)
+        cv2.imshow('edge', edges_frame)
+
 
         # cv2.imshow("frame", frame)
         cv2.waitKey(33)
