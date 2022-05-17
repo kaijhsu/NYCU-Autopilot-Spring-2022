@@ -31,9 +31,7 @@ def main():
     yaw_pid.initialize()
 
     maxSpeed = 40
-    stage = -1
-    Right = True
-    Up = True
+    stage = 0
     lower_range = np.array([101, 50, 38])
     upper_range = np.array([110, 255, 255])
 
@@ -65,13 +63,12 @@ def main():
         z_update = 0
         y_update = 0
         yaw_update_deg = 0
-        max_x_fix = 15
 
-        if markerIds is not None and stage == -1 :
+        if markerIds is not None and stage == 0 :
             if 0 in markerIds :
                 idx_0 = markerIds.tolist().index([0])
                 if tvec[idx_0,0,2] < 80 and tvec[idx_0,0,1] < 20:
-                    stage = 0
+                    stage = 1
                     drone.move_right(40)
                     # time.sleep(5)
                 else:
@@ -93,59 +90,61 @@ def main():
                         y_update = maxSpeed
                     elif y_update < -maxSpeed:
                         y_update = -maxSpeed
-
-                    # cv2.putText(frame, str(x_update), (20, 460),
-                    #             cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
-        if stage != -1:
+        if stage != 0:
+            # horrizon
             if cntarray[0] > 1 and cntarray[1] == 0:
-                if stage == 3:
-                    stage = 4
-                if stage == 7:
-                    stage = 8
-                    Up = False
-                if Right == True:
-                    drone.move_right(20)
-                else:
-                    drone.move_left(20)
-                    # corner
-            elif cntarray[0] > 1 and cntarray[1] > 1:
-                if stage == 0:
-                    stage = 1
-                    drone.move_forward(20)
-                if stage == 2:
-                    stage = 3
-                    # drone.move_forward(20)
                 if stage == 4:
                     stage = 5
-                    # drone.move_forward(20)
-                if stage == 6:
-                    stage = 7
-                if stage == 8:
+                elif stage == 8:
                     stage = 9
-                if Up == True:
-                    if stage == 3:
-                        drone.move_up(35)
-                        drone.move_right(40)
-                    else:
-                        drone.move_up(20)
-                else:
-                    drone.move_down(20)
-                    # vertical
-            elif cntarray[0] == 0 and cntarray[1] > 1:
+            # corner
+            elif cntarray[0] > 1 and cntarray[1] > 1:
                 if stage == 1:
-                    stage = 3
-                    drone.move_right(40)
-                if stage == 5:
-                    stage = 7
-                    Right = False
-                if stage == 9:
+                    stage = 2
+                elif stage == 3:
+                    stage = 4
+                elif stage == 5:
+                    stage = 6
+                elif stage == 7:
+                    stage = 8
+                elif stage == 9:
                     stage = 10
-                if Up == True:
-                    drone.move_up(20)
-                else:
-                    drone.move_down(20)
-            # else:
-            #     drone.move_back(20)
+                elif stage == 11:
+                    stage = 12
+            # vertical
+            elif cntarray[0] == 0 and cntarray[1] > 1:
+                if stage == 2:
+                    stage = 3
+                elif stage == 6:
+                    stage = 7
+                elif stage == 10:
+                    stage = 11
+
+            if stage == 1:
+                x_update = 10
+            elif stage == 2:
+                y_update = 5
+            elif stage == 3:
+                y_update = 5
+            elif stage == 4:
+                x_update = 5
+            elif stage == 5:
+                x_update = 5
+            elif stage == 6:
+                y_update = 5
+            elif stage == 7:
+                y_update = 5
+            elif stage == 8:
+                x_update = -10
+            elif stage == 9:
+                x_update = -10
+            elif stage == 10:
+                y_update = -10
+            elif stage == 11:
+                y_update = -10
+            elif stage == 12:
+                drone.land()
+
         cv2.putText(frame, str(cntarray)+str(stage), (20, 460),
                     cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
         # cv2.imshow("edge frame",edges_frame)
@@ -159,7 +158,6 @@ def main():
         else:
             keyboard(drone, key)
 
-        # cv2.imshow("frame", frame)
         cv2.waitKey(33)
 
 if __name__ == "__main__":
