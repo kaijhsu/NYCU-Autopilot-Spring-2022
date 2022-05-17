@@ -50,13 +50,14 @@ def main():
         gray = cv2.cvtColor(frameb, cv2.COLOR_RGB2GRAY)
         blur_gray = cv2.GaussianBlur(gray,(9, 9), 0)
         edges_frame = cv2.Canny(blur_gray, 30, 70)
-        cntarray,fixframe = lineDetector(edges_frame,frame)
+        fixframe = frame
+        cntarray,fixframe = lineDetector(edges_frame,fixframe)
 
         dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
         parameters = cv2.aruco.DetectorParameters_create()
         markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(
             frame, dictionary, parameters=parameters)
-        fixframe = cv2.aruco.drawDetectedMarkers(frame, markerCorners, markerIds)
+        fixframe = cv2.aruco.drawDetectedMarkers(fixframe, markerCorners, markerIds)
         rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(
             markerCorners, 15, intrinsic, distortion)
         x_update = 0
