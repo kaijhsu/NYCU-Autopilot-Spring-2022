@@ -73,7 +73,6 @@ def main():
                 if tvec[idx_0,0,2] < 80 and tvec[idx_0,0,1] < 20:
                     stage = 0
                     drone.move_right(30)
-                    drone.move_forward(30)
                     # time.sleep(5)
                 else:
                     fixframe = cv2.aruco.drawAxis(
@@ -110,6 +109,8 @@ def main():
             if cntarray[0] > 1 and cntarray[1] == 0:
                 if stage == 3:
                     stage = 4
+                    time.sleep(1)
+
                 if stage == 7:
                     stage = 8
                     Up = False
@@ -140,6 +141,7 @@ def main():
             elif cntarray[0] == 0 and cntarray[1] > 1:
                 if stage == 1:
                     stage = 2
+                    drone.move_right(20)
                 if stage == 5:
                     stage = 6
                     Right = False
