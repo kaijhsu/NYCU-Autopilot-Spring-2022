@@ -4,54 +4,10 @@ import time
 import math
 from djitellopy import Tello
 from pyimagesearch.pid import PID
-from Dector import gridDetector
+from Dector import lineDetector
+from KeyBoard import keyboard
 
-def keyboard(self, key):
-    fb_speed = 40
-    lf_speed = 40
-    ud_speed = 50
-    degree = 30
-    if key == ord('1'):
-        self.takeoff()
-        # is_flying = True
-    if key == ord('2'):
-        self.land()
-        # is_flying = False
-    if key == ord('3'):
-        self.send_rc_control(0, 0, 0, 0)
-        print("stop!!!!")
-    if key == ord('w'):
-        self.send_rc_control(0, fb_speed, 0, 0)
-        print("forward!!!!")
-    if key == ord('s'):
-        self.send_rc_control(0, (-1) * fb_speed, 0, 0)
-        print("backward!!!!")
-    if key == ord('a'):
-        self.send_rc_control((-1) * lf_speed, 0, 0, 0)
-        print("left!!!!")
-    if key == ord('d'):
-        self.send_rc_control(lf_speed, 0, 0, 0)
-        print("right!!!!")
-    if key == ord('z'):
-        self.send_rc_control(0, 0, ud_speed, 0)
-        print("down!!!!")
-    if key == ord('x'):
-        self.send_rc_control(0, 0, (-1) * ud_speed, 0)
-        print("up!!!!")
-    if key == ord('c'):
-        self.send_rc_control(0, 0, 0, degree)
-        print("rotate!!!!")
-    if key == ord('v'):
-        self.send_rc_control(0, 0, 0, (-1) * degree)
-        print("counter rotate!!!!")
-    if key == ord('5'):
-        height = self.get_height()
-        print(height)
-    if key == ord('6'):
-        battery = self.get_battery()
-        print("battery:  "+str(battery))
-        print("battery:  "+str(battery))
-        print("battery:  "+str(battery))
+
 
 
 def main():
@@ -75,20 +31,18 @@ def main():
     yaw_pid.initialize()
 
     maxSpeed = 40
-    flag = 0
-    lower_range = np.array([110,50,50])
-    upper_range = np.array([130,255,255])
+    stage = -1
+    Right = True
+    Up = True
+    lower_range = np.array([101, 50, 38])
+    upper_range = np.array([110, 255, 255])
 
     while (True):
-        #drone.send_rc_control(0, 0, 0, 0)
-        #drone.send_rc_control(0, 0, 0, 0)
         drone.streamon()
         frame = drone.get_frame_read()
         frame = frame.frame
 
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        lower_range = np.array([110, 50, 50])
-        upper_range = np.array([130, 255, 255])
         mask = cv2.inRange(hsv_frame, lower_range, upper_range)
         result = cv2.bitwise_and(frame, frame, mask=mask)
 
@@ -96,42 +50,30 @@ def main():
         gray = cv2.cvtColor(frameb, cv2.COLOR_RGB2GRAY)
         blur_gray = cv2.GaussianBlur(gray,(9, 9), 0)
         edges_frame = cv2.Canny(blur_gray, 30, 70)
-        inputarry = gridDetector(edges_frame,3000)
-        # for i in range(h):
-        #     for j in range(w):
-        #         print()
-        cv2.imshow('frame', frame)
-        cv2.imshow('Result', edges_frame)
+        cntarray,fixframe = lineDetector(edges_frame,frame)
 
-        # cv2.imshow("frame", frame)
         dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
         parameters = cv2.aruco.DetectorParameters_create()
         markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(
             frame, dictionary, parameters=parameters)
-        frame = cv2.aruco.drawDetectedMarkers(frame, markerCorners, markerIds)
+        fixframe = cv2.aruco.drawDetectedMarkers(frame, markerCorners, markerIds)
         rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(
             markerCorners, 15, intrinsic, distortion)
-        deectframe = frame;
-
         x_update = 0
         z_update = 0
         y_update = 0
         yaw_update_deg = 0
         max_x_fix = 15
 
-        if markerIds is not None and flag == 0 :
+        if markerIds is not None and stage == -1 :
             if 0 in markerIds :
                 idx_0 = markerIds.tolist().index([0])
-                if tvec[idx_0,0,2] < 80 and tvec[idx_0,0,1] < 10 and tvec[idx_0,0,0] < 10 and inputarry[1] and inputarry[5]:
-                    flag = 1
+                if tvec[idx_0,0,2] < 80 and tvec[idx_0,0,1] < 20:
+                    stage = 0
                     time.sleep(5)
                 else:
-                    frame = cv2.aruco.drawAxis(
+                    fixframe = cv2.aruco.drawAxis(
                         frame, intrinsic, distortion, rvec[idx_0], tvec[idx_0], 5)
-                    tvec_str = "x=%4.0f y=%4.0f z=%4.0f" % (
-                        tvec[idx_0][0][0], tvec[idx_0][0][1], tvec[idx_0][0][2])
-                    rvec_str = "x=%4.0f y=%4.0f z=%4.0f" % (
-                        rvec[idx_0][0][0], rvec[idx_0][0][1], rvec[idx_0][0][2])
 
                     z_update = tvec[idx_0, 0, 2] - 70
                     z_update = z_pid.update(z_update, sleep=0)
@@ -158,47 +100,54 @@ def main():
                         elif y_update < -maxSpeed:
                             y_update = -maxSpeed
 
-                    cv2.putText(frame, str(x_update), (20, 460),
-                                cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
-        if flag == 1:
-            if (inputarry[2] & inputarry[5]) or (inputarry[5] & inputarry[8]):
-                flag = 2
-                drone.move_right(20)
+                    # cv2.putText(frame, str(x_update), (20, 460),
+                    #             cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
+        if stage != -1:
+            if cntarray[0] > 0 and cntarray[1] == 0:
+                if stage == 3:
+                    stage = 4
+                if stage == 7:
+                    stage = 8
+                    Up = False
+                if Right == True:
+                    drone.move_right(20)
+                else:
+                    drone.move_left(20)
+                    # corner
+            elif cntarray[0] > 0 and cntarray[1] > 0:
+                if stage == 0:
+                    stage = 1
+                if stage == 2:
+                    stage = 3
+                if stage == 4:
+                    stage = 5
+                if stage == 6:
+                    stage = 7
+                if stage == 8:
+                    stage = 9
+                if Up == True:
+                    drone.move_up(20)
+                else:
+                    drone.move_down(20)
+                    # vertical
+            elif cntarray[0] == 0 and cntarray[1] > 0:
+                if stage == 1:
+                    stage = 2
+                if stage == 5:
+                    stage = 6
+                    Right = False
+                if stage == 9:
+                    stage = 10
+                if Up == True:
+                    drone.move_up(20)
+                else:
+                    drone.move_down(20)
             else:
-                drone.move_right(20)
-        if flag == 2:
-            if (inputarry[0] & inputarry[1]) or (inputarry[1] & inputarry[2]):
-                flag = 3
-                drone.move_up(20)
-            else:
-                drone.move_up(20)
-        if flag == 3:
-            if (inputarry[2] & inputarry[5]) or (inputarry[5] & inputarry[8]):
-                flag = 4
-                drone.move_right(20)
-            else:
-                drone.move_right(20)
-        if flag == 4:
-            if (inputarry[0] & inputarry[1]) or (inputarry[1] & inputarry[2]):
-                flag = 5
-                drone.move_up(20)
-            else:
-                drone.move_up(20)
-        if flag == 5:
-            if (inputarry[0] & inputarry[3]) or (inputarry[3] & inputarry[6]):
-                flag = 6
-                drone.move_left(20)
-            else:
-                drone.move_left(20)
-        if flag == 6:
-            if ~(inputarry[6] & inputarry[7] & inputarry[8]):
-                flag = 7
-                drone.move_down(20)
-            else:
-                drone.move_down(20)
-        if flag == 7:
-            drone.land()
-        print(flag)
+                drone.move_back(20)
+        cv2.putText(frame, str(cntarray)+str(stage), (20, 460),
+                    cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
+        # cv2.imshow("edge frame",edges_frame)
+        cv2.imshow('frame', fixframe)
         key = cv2.waitKey(1)
         if key == -1:
             y_update = min(y_update, 30)

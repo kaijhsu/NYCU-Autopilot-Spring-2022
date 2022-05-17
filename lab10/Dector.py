@@ -3,6 +3,36 @@ import cv2
 # from numba import njit
 
 
+def lineDetector(edges_frame,frame):
+    lines = cv2.HoughLines(edges_frame, 1, 3.14159 / 180, 60)
+    cnt = [0, 0]
+    if lines is not None:
+        for line in lines:
+            rho, theta = line[0]
+            a = np.cos(theta)
+            b = np.sin(theta)
+            x0 = a*rho
+            y0 = b*rho
+            x1 = int(x0 + 1000*(-b))
+            y1 = int(y0 + 1000*(a))
+            x2 = int(x0 - 1000*(-b))
+            y2 = int(y0 - 1000*(a))
+            if x2 == x1:
+                cnt[1] += 1
+            else:
+                ratio = (y2-y1)/(x2-x1)
+                if -1 < ratio <= 1:
+                    cnt[0] += 1
+                else:
+                    cnt[1] += 1
+            cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 3)
+    return cnt,frame
+
+
+
+
+
+
 # @njit
 def scanColor(frame):
     height, width = frame.shape
