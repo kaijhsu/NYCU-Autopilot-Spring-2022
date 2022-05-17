@@ -58,7 +58,8 @@ def main():
         gray = cv2.cvtColor(frameb, cv2.COLOR_RGB2GRAY)
         blur_gray = cv2.GaussianBlur(gray,(9, 9), 0)
         edges_frame = cv2.Canny(blur_gray, 30, 70)
-        cntarray,fixframe = lineDetector(edges_frame,frame)
+        fixframe = frame
+        cntarray,fixframe = lineDetector(edges_frame,fixframe)
 
         x_update = 0
         z_update = 0
