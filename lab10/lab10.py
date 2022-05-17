@@ -42,6 +42,14 @@ def main():
         frame = drone.get_frame_read()
         frame = frame.frame
 
+        dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
+        parameters = cv2.aruco.DetectorParameters_create()
+        markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(
+            frame, dictionary, parameters=parameters)
+        frame = cv2.aruco.drawDetectedMarkers(frame, markerCorners, markerIds)
+        rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(
+            markerCorners, 15, intrinsic, distortion)
+
         hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         mask = cv2.inRange(hsv_frame, lower_range, upper_range)
         result = cv2.bitwise_and(frame, frame, mask=mask)
@@ -52,13 +60,6 @@ def main():
         edges_frame = cv2.Canny(blur_gray, 30, 70)
         cntarray,fixframe = lineDetector(edges_frame,frame)
 
-        dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_6X6_250)
-        parameters = cv2.aruco.DetectorParameters_create()
-        markerCorners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(
-            frame, dictionary, parameters=parameters)
-        fixframe = cv2.aruco.drawDetectedMarkers(frame, markerCorners, markerIds)
-        rvec, tvec, _objPoints = cv2.aruco.estimatePoseSingleMarkers(
-            markerCorners, 15, intrinsic, distortion)
         x_update = 0
         z_update = 0
         y_update = 0
@@ -70,7 +71,9 @@ def main():
                 idx_0 = markerIds.tolist().index([0])
                 if tvec[idx_0,0,2] < 80 and tvec[idx_0,0,1] < 20:
                     stage = 0
-                    time.sleep(5)
+                    drone.move_right(30)
+                    drone.move_forward(30)
+                    # time.sleep(5)
                 else:
                     fixframe = cv2.aruco.drawAxis(
                         frame, intrinsic, distortion, rvec[idx_0], tvec[idx_0], 5)
@@ -103,7 +106,7 @@ def main():
                     # cv2.putText(frame, str(x_update), (20, 460),
                     #             cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 5, cv2.LINE_AA)
         if stage != -1:
-            if cntarray[0] > 0 and cntarray[1] == 0:
+            if cntarray[0] > 1 and cntarray[1] == 0:
                 if stage == 3:
                     stage = 4
                 if stage == 7:
@@ -114,13 +117,16 @@ def main():
                 else:
                     drone.move_left(20)
                     # corner
-            elif cntarray[0] > 0 and cntarray[1] > 0:
+            elif cntarray[0] > 1 and cntarray[1] > 1:
                 if stage == 0:
                     stage = 1
+                    drone.move_forward(20)
                 if stage == 2:
                     stage = 3
+                    drone.move_forward(20)
                 if stage == 4:
                     stage = 5
+                    drone.move_forward(20)
                 if stage == 6:
                     stage = 7
                 if stage == 8:
@@ -130,7 +136,7 @@ def main():
                 else:
                     drone.move_down(20)
                     # vertical
-            elif cntarray[0] == 0 and cntarray[1] > 0:
+            elif cntarray[0] == 0 and cntarray[1] > 1:
                 if stage == 1:
                     stage = 2
                 if stage == 5:
