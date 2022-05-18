@@ -34,6 +34,7 @@ def main():
     stage = 0
     lower_range = np.array([101, 50, 38])
     upper_range = np.array([110, 255, 255])
+    see_corner = False
 
     while (True):
         drone.streamon()
@@ -67,10 +68,10 @@ def main():
         if markerIds is not None and stage == 0 :
             if 0 in markerIds :
                 idx_0 = markerIds.tolist().index([0])
-                if tvec[idx_0,0,2] < 80 and tvec[idx_0,0,1] < 20:
+                if tvec[idx_0,0,2] < 60 and tvec[idx_0,0,1] < 20:
                     stage = 1
-                    drone.move_right(40)
-                    # time.sleep(5)
+                    drone.move_right(50)
+                    time.sleep(3)
                 else:
                     fixframe = cv2.aruco.drawAxis(
                         frame, intrinsic, distortion, rvec[idx_0], tvec[idx_0], 5)
@@ -101,6 +102,7 @@ def main():
             elif cntarray[0] > 1 and cntarray[1] > 1:
                 if stage == 1:
                     stage = 2
+                    see_corner = True
                 elif stage == 3:
                     stage = 4
                 elif stage == 5:
@@ -121,27 +123,32 @@ def main():
                     stage = 11
 
             if stage == 1:
-                x_update = 10
+                x_update = 19
             elif stage == 2:
-                y_update = 5
+                y_update = 15
+                if see_corner == True:
+                    z_update = 7
+                    see_corner = False
             elif stage == 3:
-                y_update = 5
+                y_update = 20
             elif stage == 4:
-                x_update = 5
+                x_update = 15
             elif stage == 5:
-                x_update = 5
+                x_update = 10
             elif stage == 6:
-                y_update = 5
+                y_update = 15
+                # z_update = -5
             elif stage == 7:
-                y_update = 5
+                y_update = 20
             elif stage == 8:
-                x_update = -10
+                x_update = -15
+                z_update = -10
             elif stage == 9:
-                x_update = -10
+                x_update = -15
             elif stage == 10:
-                y_update = -10
+                y_update = -15
             elif stage == 11:
-                y_update = -10
+                y_update = -17
             elif stage == 12:
                 drone.land()
 
