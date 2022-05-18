@@ -6,6 +6,7 @@ import cv2
 def lineDetector(edges_frame,frame):
     lines = cv2.HoughLines(edges_frame, 1, 3.14159 / 180, 60)
     cnt = [0, 0]
+    center = [0, 0]
     if lines is not None:
         for line in lines:
             rho, theta = line[0]
@@ -23,10 +24,16 @@ def lineDetector(edges_frame,frame):
                 ratio = (y2-y1)/(x2-x1)
                 if -1 < ratio <= 1:
                     cnt[0] += 1
+                    center[0] += (y1+y2)/2
                 else:
                     cnt[1] += 1
+                    center[1] += (x1+x2)/2
             cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 3)
-    return cnt,frame
+    center[0] /= max(1,cnt[0])
+    center[1] /= max(1,cnt[1])
+    center[0] = int(center[0])
+    center[1] = int(center[1])
+    return cnt,frame,center
 
 
 

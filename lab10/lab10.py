@@ -58,7 +58,7 @@ def main():
         blur_gray = cv2.GaussianBlur(gray,(9, 9), 0)
         edges_frame = cv2.Canny(blur_gray, 30, 70)
         fixframe = frame
-        cntarray,fixframe = lineDetector(edges_frame,fixframe)
+        cntarray,fixframe,lineCenter = lineDetector(edges_frame,fixframe)
 
         x_update = 0
         z_update = 0
@@ -127,7 +127,7 @@ def main():
             elif stage == 2:
                 y_update = 15
                 if see_corner == True:
-                    z_update = 7
+                    z_update = 84
                     see_corner = False
             elif stage == 3:
                 y_update = 20
